@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createDb } from "./duck";
 import { Table } from "./table";
 import { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
+import { useSearchParams } from "~/useSearchParams";
 
 const DEFAULT_DATASET_URL =
   "https://huggingface.co/datasets/openai/openai_humaneval/resolve/main/openai_humaneval/test-00000-of-00001.parquet";
@@ -16,10 +17,24 @@ const arrowResultToJson = (arrowResult: any) => {
   return arrowResult.toArray().map((row: any) => row.toJSON());
 };
 
+const usePersistedTextfield = (fieldName: string) => {
+  const { searchParams, setSearchParams } = useSearchParams();
+  const searchParamsObj = new URLSearchParams(searchParams);
+  const textField = searchParamsObj.get(fieldName) || "";
+  const setTextField = useCallback(
+    (value: string) => {
+      setSearchParams({ [fieldName]: value });
+    },
+    [fieldName, setSearchParams]
+  );
+  return { textField, setTextField };
+};
+
 function App() {
   const [loading, setLoading] = useState(false);
-  const [datasetUrl, setDatasetUrl] = useState("");
-  const [textField, setTextField] = useState("");
+  const { textField: datasetUrl, setTextField: setDatasetUrl } =
+    usePersistedTextfield("datasetUrl");
+  const [textField, setTextField] = useState(() => datasetUrl);
   const [db, setDb] = useState<Awaited<ReturnType<typeof createDb>> | null>(
     null
   );
