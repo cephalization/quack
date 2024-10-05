@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Table } from "./table";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
@@ -24,16 +24,32 @@ const usePersistedTextfield = (fieldName: string) => {
 
 function App() {
   const [datasetUrl, setDatasetUrl] = usePersistedTextfield("datasetUrl");
+  const [datasetQuery, setDatasetQuery] = usePersistedTextfield("datasetQuery");
   const [nextDatasetUrl, setNextDatasetUrl] = useState(() => datasetUrl);
+  const [nextDatasetQuery, setNextDatasetQuery] = useState(() => datasetQuery);
   const db = useDuckDb();
-  const { loading, dataset, error, clearDataset } = useParquetTable(
-    db,
-    datasetUrl
+  const onQueryChanged = useCallback(
+    (query: string) => {
+      console.log("Query changed", query);
+      setNextDatasetQuery(query);
+    },
+    [setNextDatasetQuery]
   );
+  useEffect(() => {
+    setNextDatasetQuery(datasetQuery);
+  }, [datasetQuery]);
+  const { loading, dataset, error, clearDataset } = useParquetTable(db, {
+    datasetUrl,
+    datasetQuery,
+    setDatasetQuery,
+    onQueryChanged,
+  });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setNextDatasetQuery("");
     setDatasetUrl(nextDatasetUrl);
+    setDatasetQuery("");
   };
 
   return (
@@ -67,6 +83,10 @@ function App() {
             variant={"secondary"}
             type="button"
             onClick={() => {
+              if (datasetUrl !== DEFAULT_DATASET_URL) {
+                setDatasetQuery("");
+                setNextDatasetQuery("");
+              }
               setNextDatasetUrl(DEFAULT_DATASET_URL);
               setDatasetUrl(DEFAULT_DATASET_URL);
             }}
@@ -86,12 +106,37 @@ function App() {
           </Button>
         </div>
       </form>
+      {dataset && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setDatasetQuery(nextDatasetQuery);
+          }}
+          className="flex gap-2 w-full items-center"
+        >
+          <Textarea
+            rows={2}
+            name="textField"
+            onChange={(e) => setNextDatasetQuery(e.target.value)}
+            value={nextDatasetQuery}
+            className="w-full lg:w-full"
+            placeholder="SELECT * FROM dataset LIMIT 10;"
+          />
+          <Button type="submit" className="h-full">
+            Run Query
+          </Button>
+        </form>
+      )}
       <div className="flex flex-col gap-2 w-full max-w-full overflow-x-auto bg-secondary rounded">
         {loading && (
           <p className="text-lg font-medium self-center">Loading...</p>
         )}
         {error && <p style={{ color: "red" }}>{error}</p>}
-        {dataset && <Table data={dataset} />}
+        {dataset && (
+          <div className="flex flex-col gap-2">
+            <Table data={dataset} />
+          </div>
+        )}
       </div>
     </section>
   );
