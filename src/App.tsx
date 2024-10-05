@@ -1,21 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Table } from "./table";
-import { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { useSearchParams } from "~/useSearchParams";
 import { useDuckDb } from "~/useDuckDb";
+import { useParquetTable } from "~/useParquetTable";
 
 const DEFAULT_DATASET_URL =
   "https://huggingface.co/datasets/openai/openai_humaneval/resolve/main/openai_humaneval/test-00000-of-00001.parquet";
-
-// https://duckdb.org/docs/api/wasm/query#arrow-table-to-json
-// TODO: import the arrow lib and use the correct type
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const arrowResultToJson = (arrowResult: any) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return arrowResult.toArray().map((row: any) => row.toJSON());
-};
 
 const usePersistedTextfield = (fieldName: string) => {
   const { searchParams, setSearchParams } = useSearchParams();
@@ -31,61 +23,13 @@ const usePersistedTextfield = (fieldName: string) => {
 };
 
 function App() {
-  const [loading, setLoading] = useState(false);
   const [datasetUrl, setDatasetUrl] = usePersistedTextfield("datasetUrl");
   const [nextDatasetUrl, setNextDatasetUrl] = useState(() => datasetUrl);
-  const [dataset, setDataset] = useState<null>(null);
-  const [error, setError] = useState<string | null>(null);
   const db = useDuckDb();
-
-  useEffect(() => {
-    if (db && datasetUrl) {
-      setLoading(true);
-      setDataset(null);
-      setError(null);
-      console.log("Loading", datasetUrl);
-      const status: { conn: AsyncDuckDBConnection | null; killed: boolean } = {
-        conn: null,
-        killed: false,
-      };
-      db.connect().then((conn) => {
-        if (status.killed) {
-          conn.close();
-          return;
-        }
-        status.conn = conn;
-        conn
-          // we get httpfs for free with cors restrictions
-          // we get parquet downloaded as we load it
-          // https://duckdb.org/docs/api/wasm/extensions
-          // https://duckdb.org/docs/api/wasm/data_ingestion#parquet
-          .query(
-            `LOAD parquet;LOAD httpfs;SELECT * FROM '${datasetUrl}' LIMIT 10`
-          )
-          .then((result) => setDataset(arrowResultToJson(result)))
-          .catch((err) => {
-            console.error(err);
-            setError(err.message);
-            setDataset(null);
-          })
-          .finally(() => {
-            conn.close();
-            setLoading(false);
-          });
-      });
-
-      return () => {
-        status.killed = true;
-        if (status.conn) {
-          console.log("Closing connection");
-          status.conn.close();
-        }
-      };
-    } else if (db) {
-      console.log("Resetting db");
-      db.reset();
-    }
-  }, [db, datasetUrl]);
+  const { loading, dataset, error, clearDataset } = useParquetTable(
+    db,
+    datasetUrl
+  );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -111,7 +55,11 @@ function App() {
           <Button
             className="w-full"
             type="submit"
-            disabled={!nextDatasetUrl || nextDatasetUrl === datasetUrl}
+            disabled={
+              !nextDatasetUrl ||
+              (nextDatasetUrl === datasetUrl && !!dataset) ||
+              loading
+            }
           >
             Load
           </Button>
@@ -130,7 +78,7 @@ function App() {
             variant={"destructive"}
             onClick={() => {
               setNextDatasetUrl("");
-              setDataset(null);
+              clearDataset();
               setDatasetUrl("");
             }}
           >
