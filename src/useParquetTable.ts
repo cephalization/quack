@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const arrowResultToJson = (arrowResult: any) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return arrowResult.toArray().map((row: any) => row.toJSON());
+  return arrowResult.toArray().map((row: any) => row.toJSON()) || [];
 };
 
 export const useParquetTable = (

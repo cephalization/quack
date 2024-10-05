@@ -12,9 +12,16 @@ interface TableProps {
 }
 
 export const Table: React.FC<TableProps> = ({ data }) => {
-  const headers = useMemo(() => Object.keys(data[0]), [data]);
+  const headers = useMemo(
+    () =>
+      data.length > 0 && typeof data[0] === "object"
+        ? Object.keys(data[0])
+        : [],
+    [data]
+  );
 
-  if (data.length === 0) return null;
+  if (data.length === 0)
+    return <div className="text-center p-8 font-mono">no data for query</div>;
 
   return (
     <table className="text-xs">
