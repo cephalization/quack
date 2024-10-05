@@ -1,4 +1,0 @@
-dist/assets/duckdb-browser-eh.worker-CU4eSUTR.js filter=lfs diff=lfs merge=lfs -text
-dist/assets/duckdb-browser-mvp.worker-CyigcHar.js filter=lfs diff=lfs merge=lfs -text
-dist/assets/duckdb-eh-CL-fYs8o.wasm filter=lfs diff=lfs merge=lfs -text
-dist/assets/duckdb-mvp-CI5K6Di1.wasm filter=lfs diff=lfs merge=lfs -text
