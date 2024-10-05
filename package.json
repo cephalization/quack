@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build && rimraf dist/assets/*.wasm",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "pnpx http-server --proxy http://localhost:8080\\? dist --cors"
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "1.28.1-dev106.0",

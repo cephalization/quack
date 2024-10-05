@@ -49,7 +49,13 @@ export const createDb = async () => {
   // Select a bundle based on browser checks
   const bundle = await duckdb.selectBundle(bundles);
   // Instantiate the asynchronus version of DuckDB-wasm
-  const worker = new Worker(bundle.mainWorker!);
+  let wk = bundle.mainWorker!;
+  if (wk.startsWith("http") && production) {
+    // fetch worker contents, convert to base64, inject into worker
+    const blob = await fetch(wk).then((r) => r.text());
+    wk = `data:text/javascript;base64,${btoa(blob)}`;
+  }
+  const worker = new Worker(wk);
   const logger = new duckdb.ConsoleLogger();
   const db = new duckdb.AsyncDuckDB(logger, worker);
   await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
