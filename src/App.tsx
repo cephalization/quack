@@ -27,14 +27,13 @@ const usePersistedTextfield = (fieldName: string) => {
     },
     [fieldName, setSearchParams]
   );
-  return { textField, setTextField };
+  return [textField, setTextField] satisfies [string, (value: string) => void];
 };
 
 function App() {
   const [loading, setLoading] = useState(false);
-  const { textField: datasetUrl, setTextField: setDatasetUrl } =
-    usePersistedTextfield("datasetUrl");
-  const [textField, setTextField] = useState(() => datasetUrl);
+  const [datasetUrl, setDatasetUrl] = usePersistedTextfield("datasetUrl");
+  const [nextDatasetUrl, setNextDatasetUrl] = useState(() => datasetUrl);
   const [db, setDb] = useState<Awaited<ReturnType<typeof createDb>> | null>(
     null
   );
@@ -116,7 +115,7 @@ function App() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setDatasetUrl(textField);
+    setDatasetUrl(nextDatasetUrl);
   };
 
   return (
@@ -130,15 +129,15 @@ function App() {
         <Textarea
           rows={2}
           name="textField"
-          onChange={(e) => setTextField(e.target.value)}
-          value={textField}
+          onChange={(e) => setNextDatasetUrl(e.target.value)}
+          value={nextDatasetUrl}
           className="w-full lg:w-full"
         />
         <div className="flex flex-row justify-between gap-2">
           <Button
             className="w-full"
             type="submit"
-            disabled={!textField || textField === datasetUrl}
+            disabled={!nextDatasetUrl || nextDatasetUrl === datasetUrl}
           >
             Load
           </Button>
@@ -146,7 +145,7 @@ function App() {
             variant={"secondary"}
             type="button"
             onClick={() => {
-              setTextField(DEFAULT_DATASET_URL);
+              setNextDatasetUrl(DEFAULT_DATASET_URL);
               setDatasetUrl(DEFAULT_DATASET_URL);
             }}
           >
@@ -156,7 +155,7 @@ function App() {
             type="button"
             variant={"destructive"}
             onClick={() => {
-              setTextField("");
+              setNextDatasetUrl("");
               setDataset(null);
               setDatasetUrl("");
             }}

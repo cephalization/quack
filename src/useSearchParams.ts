@@ -21,7 +21,11 @@ const getServerSnapshot = () => {
 const setSearchParams = (searchParams: Record<string, string>) => {
   const url = new URL(window.location.href);
   Object.entries(searchParams).forEach(([key, value]) => {
-    url.searchParams.set(key, value);
+    if (value === undefined || value === null || value === "") {
+      url.searchParams.delete(key);
+    } else {
+      url.searchParams.set(key, value);
+    }
   });
   window.history.pushState({}, "", url);
   window.dispatchEvent(new PopStateEvent("popstate"));
