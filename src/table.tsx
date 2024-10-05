@@ -1,4 +1,11 @@
 import React, { useMemo } from "react";
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 
 interface TableProps {
   data: Record<string, unknown>[];
@@ -10,23 +17,25 @@ export const Table: React.FC<TableProps> = ({ data }) => {
   if (data.length === 0) return null;
 
   return (
-    <table>
-      <thead>
-        <tr>
+    <table className="text-xs">
+      <TableHeader>
+        <TableRow>
           {headers.map((header) => (
-            <th key={header}>{header}</th>
+            <TableHead key={header}>{header}</TableHead>
           ))}
-        </tr>
-      </thead>
-      <tbody>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {data.map((row, rowIndex) => (
-          <tr key={rowIndex}>
+          <TableRow key={rowIndex}>
             {headers.map((header) => (
-              <td key={`${rowIndex}-${header}`}>{String(row[header])}</td>
+              <TableCell key={`${rowIndex}-${header}`}>
+                {String(row[header])}
+              </TableCell>
             ))}
-          </tr>
+          </TableRow>
         ))}
-      </tbody>
+      </TableBody>
     </table>
   );
 };

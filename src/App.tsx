@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import "./App.css";
 import { createDb } from "./duck";
 import { Table } from "./table";
 import { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
+import { Button } from "~/components/ui/button";
+import { Textarea } from "~/components/ui/textarea";
 
 const DEFAULT_DATASET_URL =
   "https://huggingface.co/datasets/openai/openai_humaneval/resolve/main/openai_humaneval/test-00000-of-00001.parquet";
@@ -104,46 +105,59 @@ function App() {
   };
 
   return (
-    <>
-      <h1>Quack</h1>
-      <h2>Enter a hugging face dataset url</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
+    <section className="flex flex-col gap-4 w-full pt-10 px-4 lg:pt-[15%] items-center min-h-screen">
+      <h1 className="text-4xl font-bold">📣🦆 Quack</h1>
+      <h2 className="text-2xl font-medium">View Parquet Datasets via URL</h2>
+      <form
+        onSubmit={handleSubmit}
+        className="lg:w-1/2 w-full flex flex-col gap-2"
+      >
+        <Textarea
+          rows={2}
           name="textField"
           onChange={(e) => setTextField(e.target.value)}
           value={textField}
+          className="w-full lg:w-full"
         />
-        <button type="submit" disabled={!textField || textField === datasetUrl}>
-          Load
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setTextField(DEFAULT_DATASET_URL);
-            setDatasetUrl(DEFAULT_DATASET_URL);
-          }}
-        >
-          Load Default
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setTextField("");
-            setDataset(null);
-            setDatasetUrl("");
-          }}
-        >
-          Clear
-        </button>
+        <div className="flex flex-row justify-between gap-2">
+          <Button
+            className="w-full"
+            type="submit"
+            disabled={!textField || textField === datasetUrl}
+          >
+            Load
+          </Button>
+          <Button
+            variant={"secondary"}
+            type="button"
+            onClick={() => {
+              setTextField(DEFAULT_DATASET_URL);
+              setDatasetUrl(DEFAULT_DATASET_URL);
+            }}
+          >
+            Load Default
+          </Button>
+          <Button
+            type="button"
+            variant={"destructive"}
+            onClick={() => {
+              setTextField("");
+              setDataset(null);
+              setDatasetUrl("");
+            }}
+          >
+            Clear
+          </Button>
+        </div>
       </form>
-      <div>
-        <h2>Dataset</h2>
-        {loading && <p>Loading...</p>}
+      <div className="flex flex-col gap-2 w-full max-w-full overflow-x-auto bg-secondary rounded">
+        {loading && (
+          <p className="text-lg font-medium self-center">Loading...</p>
+        )}
         {error && <p style={{ color: "red" }}>{error}</p>}
         {dataset && <Table data={dataset} />}
       </div>
-    </>
+    </section>
   );
 }
 
