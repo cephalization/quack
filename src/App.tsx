@@ -135,7 +135,7 @@ function App() {
               setDatasetUrl(DEFAULT_DATASET_URL);
             }}
           >
-            Load Default
+            Load Example Dataset
           </Button>
           <Button
             type="button"
