@@ -2,6 +2,7 @@
 title: Quack
 emoji: 🦆
 app_file: dist/index.html
+sdk: static
 ---
 
 # Quack
