@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { createDb } from "./duck";
 import { Table } from "./table";
 import { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { useSearchParams } from "~/useSearchParams";
+import { useDuckDb } from "~/useDuckDb";
 
 const DEFAULT_DATASET_URL =
   "https://huggingface.co/datasets/openai/openai_humaneval/resolve/main/openai_humaneval/test-00000-of-00001.parquet";
@@ -34,35 +34,9 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [datasetUrl, setDatasetUrl] = usePersistedTextfield("datasetUrl");
   const [nextDatasetUrl, setNextDatasetUrl] = useState(() => datasetUrl);
-  const [db, setDb] = useState<Awaited<ReturnType<typeof createDb>> | null>(
-    null
-  );
   const [dataset, setDataset] = useState<null>(null);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    const status = {
-      killed: false,
-    };
-    const initDb = async () => {
-      const db = await createDb();
-      if (status.killed) {
-        db.terminate();
-        return;
-      }
-      setDb(db);
-    };
-    initDb();
-
-    return () => {
-      status.killed = true;
-      setDb((db) => {
-        if (db) {
-          db.terminate();
-        }
-        return null;
-      });
-    };
-  }, []);
+  const db = useDuckDb();
 
   useEffect(() => {
     if (db && datasetUrl) {
