@@ -21,3 +21,11 @@ npm i -g pnpm
 pnpm i
 pnpm run dev
 ```
+## To-do 
+
+- [ ] Implement [content-visibility](https://web.dev/articles/content-visibility#skipping_rendering_work_with_content-visibility) to virtualize large result tables
+- [ ] Integrate webllm for in browser text to sql capability
+- [ ] Actually design the app. Tabs, tooltips, data hierarchy, better table
+- [ ] Add more example datasets in a dropdown
+- [ ] Dataset history
+- [ ] pwa
