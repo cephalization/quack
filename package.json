@@ -9,7 +9,8 @@
     "build": "tsc -b && vite build && rimraf dist/*.wasm",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "pnpx http-server --proxy http://localhost:8080\\? dist --cors"
+    "start": "pnpx http-server --proxy http://localhost:8080\\? dist --cors",
+    "deploy": "pnpm run build && git add . && git commit -m 'deploy' && git push && git push space"
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "1.28.1-dev106.0",
