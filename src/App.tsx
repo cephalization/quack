@@ -72,6 +72,7 @@ function App() {
             className="w-full"
             type="submit"
             disabled={
+              !db ||
               !nextDatasetUrl ||
               (nextDatasetUrl === datasetUrl && !!dataset) ||
               loading
@@ -128,7 +129,7 @@ function App() {
         </form>
       )}
       <div className="flex flex-col gap-2 w-full max-w-full overflow-x-auto bg-secondary rounded">
-        {loading && (
+        {(!db || loading) && (
           <p className="text-lg font-medium self-center">Loading...</p>
         )}
         {error && <p style={{ color: "red" }}>{error}</p>}
